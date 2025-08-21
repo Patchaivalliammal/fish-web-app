@@ -1,0 +1,648 @@
+import React, { useMemo, useState } from "react";
+
+// Smart Fish Assistant – Single-file React app
+// Styling uses TailwindCSS utility classes.
+// Images referenced from /public/images – add your own 5 images with the given file names.
+// Files expected (put them in your project's /public/images):
+//  - salmon.jpg, tuna.jpg, crab.jpg, shrimp.jpg, octopus.jpg
+
+const FISH_DATA = {
+  salmon: {
+    name: "Salmon",
+    image: "/images/salmon.jpg",
+    tagline: "Best as Indian-style curry",
+    recommendedRecipeId: "salmon-curry",
+    cleaning: [
+      "Rinse the fish briefly under cold water; pat dry.",
+      "If the skin has scales, scrape from tail to head with a scaler or blunt knife.",
+      "Cut off head and tail (optional) and slit the belly to remove the innards. Rinse the cavity.",
+      "Fillet along the backbone; use tweezers to pull out pin bones.",
+      "Cut into steak-sized pieces for curry; keep skin on for better hold in gravy.",
+    ],
+    benefits: [
+      "Rich in omega‑3 (EPA/DHA) – supports heart and brain health.",
+      "High‑quality protein and vitamin D.",
+      "Pairs well with turmeric, garlic, and coconut milk which add anti‑inflammatory and antioxidant benefits.",
+    ],
+    recipes: [
+      {
+        id: "salmon-curry",
+        name: "Salmon Indian‑Style Curry",
+        style: "Curry",
+        time: "35–40 min",
+        serves: 4,
+        ingredients: [
+          "500 g salmon fillets, cut into 6–8 pieces",
+          "2 tbsp oil",
+          "1/2 tsp mustard seeds",
+          "10 curry leaves",
+          "1 large onion – sliced",
+          "1 large tomato – chopped",
+          "1 tbsp ginger‑garlic paste",
+          "1/2 tsp turmeric",
+          "1 tsp red chilli powder (to taste)",
+          "2 tsp coriander powder",
+          "1/2 tsp cumin powder",
+          "1/2 tsp garam masala",
+          "1 tbsp tamarind pulp (or 3–4 kokum pieces)",
+          "1 cup coconut milk",
+          "Salt, 1–1.5 cups water, coriander to garnish",
+        ],
+        steps: [
+          "(Optional) Marinate fish with a pinch of turmeric, salt, and chilli for 10 minutes.",
+          "Heat oil; crackle mustard seeds; add curry leaves.",
+          "Add onions; sauté until light brown. Add ginger‑garlic; cook 1 min.",
+          "Add tomato and cook until soft.",
+          "Add dry spices (turmeric, chilli, coriander, cumin); sauté 30–40 sec.",
+          "Add tamarind and water; simmer 5 minutes.",
+          "Slide in salmon pieces; simmer gently 6–8 minutes until just cooked.",
+          "Stir in coconut milk and garam masala; simmer 1–2 minutes (do not boil hard).",
+          "Rest 5 minutes; garnish with coriander. Serve with steamed rice or dosa.",
+        ],
+      },
+      {
+        id: "salmon-tawa-fry",
+        name: "Salmon Tawa Fry",
+        style: "Fry",
+        time: "25 min",
+        serves: 3,
+        ingredients: [
+          "400 g salmon steaks",
+          "1 tbsp ginger‑garlic paste",
+          "1 tsp Kashmiri chilli powder",
+          "1/4 tsp turmeric",
+          "1/2 tsp black pepper",
+          "1 tsp lemon juice",
+          "1 tbsp rice flour (crisp coating)",
+          "Salt, 2 tbsp oil, curry leaves",
+        ],
+        steps: [
+          "Mix all ingredients (except oil) to coat salmon; rest 10 min.",
+          "Pan‑fry on medium heat with oil, 3–4 min per side.",
+          "Finish with fried curry leaves. Serve with onion salad and lemon.",
+        ],
+      },
+    ],
+  },
+
+  tuna: {
+    name: "Tuna",
+    image: "/images/tuna.jpg",
+    tagline: "Best for deep‑fry or puttu",
+    recommendedRecipeId: "tuna-deep-fry",
+    cleaning: [
+      "For steaks: rinse, pat dry, trim dark bloodline if strong‑tasting.",
+      "Remove skin and central bones from thick steaks; cut to fry‑size pieces.",
+      "For whole fish: scale, gut, remove head/tail; cut into thick slices.",
+      "Always marinate with turmeric + salt 10 minutes to reduce odour.",
+    ],
+    benefits: [
+      "Lean, high‑protein fish with selenium and vitamin B12.",
+      "Great for quick frying; also works in Kerala‑style puttu (scramble).",
+      "(General note) Large oceanic tuna may contain more mercury – enjoy in moderation, especially for children/pregnancy.",
+    ],
+    recipes: [
+      {
+        id: "tuna-deep-fry",
+        name: "Crispy Tuna Deep Fry",
+        style: "Deep Fry",
+        time: "30 min",
+        serves: 4,
+        ingredients: [
+          "500 g tuna pieces/steaks",
+          "1 tbsp ginger‑garlic paste",
+          "1 tsp chilli powder",
+          "1/2 tsp turmeric",
+          "1/2 tsp black pepper",
+          "1 tsp lemon juice",
+          "1 tbsp rice flour + 1 tbsp cornflour",
+          "Salt, oil for deep frying",
+        ],
+        steps: [
+          "Marinate tuna with spices, lemon, and flours for 15 minutes.",
+          "Heat oil to ~175–180°C (medium‑high).",
+          "Fry pieces in batches 3–4 minutes until golden and cooked through.",
+          "Drain on rack; sprinkle chaat masala (optional).",
+        ],
+      },
+      {
+        id: "tuna-puttu",
+        name: "Tuna Puttu (South Indian Style)",
+        style: "Side Dish",
+        time: "25 min",
+        serves: 4,
+        ingredients: [
+          "2 cups cooked flaked tuna (fresh or canned, drained)",
+          "1 tbsp oil",
+          "1/2 tsp mustard seeds",
+          "1 tsp urad dal (optional)",
+          "10 curry leaves",
+          "2 green chillies – sliced",
+          "1 small onion – finely chopped",
+          "1/4 tsp turmeric",
+          "1/2 tsp pepper (or to taste)",
+          "1/2 cup grated coconut",
+          "Salt, lemon to finish",
+        ],
+        steps: [
+          "Heat oil; sputter mustard (and urad). Add curry leaves and green chillies.",
+          "Add onion; sauté till soft.",
+          "Stir in turmeric and pepper; add flaked tuna and salt.",
+          "Fold in grated coconut; cook 2–3 min. Finish with lemon.",
+        ],
+      },
+    ],
+  },
+
+  shrimp: {
+    name: "Shrimp (Prawn)",
+    image: "/images/shrimp.jpg",
+    tagline: "Best as spicy Indian side‑dish",
+    recommendedRecipeId: "shrimp-masala",
+    cleaning: [
+      "Twist off the head (if attached) and peel the shell; keep tail on or off as you like.",
+      "Score the back and pull out the dark vein (devein).",
+      "Rinse quickly, drain well, and pat dry before cooking.",
+    ],
+    benefits: [
+      "Low‑fat protein, iodine, and B12.",
+      "Cooks very fast – perfect for quick meals.",
+    ],
+    recipes: [
+      {
+        id: "shrimp-masala",
+        name: "Spicy Shrimp Masala (Side Dish)",
+        style: "Side Dish",
+        time: "20 min",
+        serves: 3,
+        ingredients: [
+          "400 g cleaned shrimp",
+          "1 tbsp oil",
+          "1 small onion – sliced",
+          "1 tsp ginger‑garlic paste",
+          "1/4 tsp turmeric",
+          "1 tsp red chilli powder",
+          "1 tsp pepper (to taste)",
+          "1 tsp coriander powder",
+          "10 curry leaves",
+          "1 tbsp thick curd or 1/4 cup coconut milk",
+          "Salt, lemon wedges",
+        ],
+        steps: [
+          "Heat oil; sauté onion till translucent. Add ginger‑garlic; cook 30 sec.",
+          "Add spices and curry leaves; splash of water to avoid burning.",
+          "Add shrimp and salt; cook 3–4 minutes till pink and just done.",
+          "Stir in curd/coconut milk and toss on high heat 30–60 sec.",
+          "Finish with lemon. Serve with rice, chapati, or dosa.",
+        ],
+      },
+    ],
+  },
+
+  crab: {
+    name: "Crab",
+    image: "/images/crab.jpg",
+    tagline: "Best for warming soups",
+    recommendedRecipeId: "crab-soup",
+    cleaning: [
+      "Wear gloves. Rinse crab; flip and lift the triangular apron to remove it.",
+      "Separate and lift off the top shell (carapace).",
+      "Pull out and discard the grey gills (“dead‑man’s fingers”), mouthparts, and guts.",
+      "Rinse the body cavity; break the body in half. Crack claws with a mallet.",
+      "Rinse once more; drain well before cooking.",
+    ],
+    benefits: [
+      "Good source of protein, zinc, and B12.",
+      "Sweet meat perfect for soups and peppery rasam‑style broths.",
+    ],
+    recipes: [
+      {
+        id: "crab-soup",
+        name: "Peppery Crab Soup (South Indian)",
+        style: "Soup",
+        time: "35–40 min",
+        serves: 4,
+        ingredients: [
+          "600 g cleaned crab pieces",
+          "1 tbsp oil",
+          "1 tsp black peppercorns (coarsely crushed)",
+          "1/2 tsp cumin seeds",
+          "1 tsp coriander seeds (crushed)",
+          "1 small onion – chopped",
+          "1 tomato – chopped",
+          "1 tbsp ginger‑garlic paste",
+          "1/4 tsp turmeric",
+          "6 cups water or light stock",
+          "Salt, coriander leaves",
+        ],
+        steps: [
+          "Heat oil; add pepper, cumin, coriander. Fry 20 sec.",
+          "Add onion; sauté till soft. Add ginger‑garlic and turmeric; cook 30 sec.",
+          "Add tomato and sauté 2 min.",
+          "Add crab pieces and salt; toss 1–2 min.",
+          "Pour water/stock; simmer 20–25 min. Adjust pepper and salt.",
+          "Garnish with coriander; serve hot.",
+        ],
+      },
+    ],
+  },
+
+  octopus: {
+    name: "Octopus",
+    image: "/images/octopus.jpg",
+    tagline: "Great as pepper roast / masala fry",
+    recommendedRecipeId: "octopus-roast",
+    cleaning: [
+      "Rinse well. Turn the head inside out; remove innards and rinse.",
+      "Cut around the beak (centre of tentacles) and remove it.",
+      "Trim away the eyes (optional).",
+      "Tenderise: simmer in lightly salted water 35–50 min until fork‑tender; drain.",
+      "Slice into bite‑size pieces for roasting.",
+    ],
+    benefits: [
+      "Lean protein with B vitamins and minerals.",
+      "Firm texture that takes on bold Indian masalas nicely.",
+    ],
+    recipes: [
+      {
+        id: "octopus-roast",
+        name: "Peppery Octopus Roast",
+        style: "Roast/Fry",
+        time: "40–55 min (incl. tenderising)",
+        serves: 4,
+        ingredients: [
+          "600 g tenderised octopus – sliced",
+          "1.5 tbsp oil",
+          "1 medium onion – sliced",
+          "1 tsp ginger‑garlic paste",
+          "1/2 tsp turmeric",
+          "1 tsp black pepper (coarse)",
+          "1 tsp chilli powder (to taste)",
+          "1 tsp coriander powder",
+          "10–12 curry leaves",
+          "1 tbsp lemon juice",
+          "Salt",
+        ],
+        steps: [
+          "Heat oil; sauté onion till edges brown. Add ginger‑garlic; cook 30 sec.",
+          "Add spices and curry leaves; fry 20–30 sec.",
+          "Add octopus, salt; roast on medium‑high 5–7 min till edges char slightly.",
+          "Finish with lemon juice. Serve with rice, parotta, or as starter.",
+        ],
+      },
+    ],
+  },
+};
+
+function Breadcrumb({ items, onNavigate }) {
+  return (
+    <div className="text-sm text-slate-600 flex items-center gap-2">
+      {items.map((it, idx) => (
+        <span key={idx} className="flex items-center gap-2">
+          {idx > 0 && <span className="opacity-60">/</span>}
+          {it.to ? (
+            <button
+              onClick={() => onNavigate(it.to)}
+              className="hover:underline"
+            >
+              {it.label}
+            </button>
+          ) : (
+            <span className="font-medium text-slate-800">{it.label}</span>
+          )}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function Card({ children, onClick, selected }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`group relative w-full text-left rounded-2xl border bg-white hover:shadow-xl transition-all overflow-hidden ${
+        selected ? "ring-2 ring-indigo-500" : "shadow-sm hover:-translate-y-0.5"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Section({ title, subtitle, right }) {
+  return (
+    <div className="flex items-end justify-between mb-4">
+      <div>
+        <h2 className="text-xl md:text-2xl font-semibold text-slate-800">{title}</h2>
+        {subtitle && (
+          <p className="text-slate-500 text-sm md:text-base">{subtitle}</p>
+        )}
+      </div>
+      {right}
+    </div>
+  );
+}
+
+function Pill({ children }) {
+  return (
+    <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium">
+      {children}
+    </span>
+  );
+}
+
+function StepList({ steps }) {
+  const [checked, setChecked] = useState(Array(steps.length).fill(false));
+
+  return (
+    <ol className="space-y-3">
+      {steps.map((s, i) => (
+        <li key={i} className="flex items-start gap-3">
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4"
+              checked={checked[i]}
+              onChange={() =>
+                setChecked((prev) => prev.map((v, idx) => (idx === i ? !v : v)))
+              }
+            />
+            <span className={`leading-relaxed ${checked[i] ? "line-through text-slate-400" : "text-slate-800"}`}>
+              {s}
+            </span>
+          </label>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function IngredientList({ items }) {
+  return (
+    <ul className="list-disc pl-6 space-y-1 text-slate-800">
+      {items.map((it, i) => (
+        <li key={i}>{it}</li>
+      ))}
+    </ul>
+  );
+}
+
+function FishGrid({ onPick }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {Object.entries(FISH_DATA).map(([key, fish]) => (
+        <Card key={key} onClick={() => onPick(key)}>
+          <div className="h-44 w-full overflow-hidden">
+            <img
+              alt={fish.name}
+              src={fish.image}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
+          <div className="p-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-slate-800">{fish.name}</h3>
+              <Pill>{fish.tagline}</Pill>
+            </div>
+            <p className="mt-2 text-sm text-slate-600">
+              Tap to see recipes, cleaning, and health benefits.
+            </p>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function FishDetail({ fishKey, onBack, onOpenRecipe }) {
+  const fish = FISH_DATA[fishKey];
+
+  return (
+    <div>
+      <Breadcrumb
+        items={[
+          { label: "Home", to: "home" },
+          { label: fish.name },
+        ]}
+        onNavigate={(to) => to === "home" && onBack()}
+      />
+
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-1">
+          <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+            <img src={fish.image} alt={fish.name} className="w-full h-56 object-cover" />
+            <div className="p-4 space-y-2">
+              <h3 className="font-semibold text-slate-800">Best Use</h3>
+              <p className="text-slate-700">{fish.tagline}</p>
+              <button
+                onClick={() => onOpenRecipe(fish.recommendedRecipeId)}
+                className="mt-2 w-full rounded-xl bg-indigo-600 text-white py-2.5 font-medium hover:bg-indigo-700"
+              >
+                View Recommended Recipe
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="md:col-span-2 space-y-8">
+          <section>
+            <Section title="Recipes" subtitle="Pick one to see ingredients and steps" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {fish.recipes.map((r) => (
+                <Card key={r.id} onClick={() => onOpenRecipe(r.id)}>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-semibold text-slate-800">{r.name}</h4>
+                      <Pill>{r.style}</Pill>
+                    </div>
+                    <div className="mt-2 text-sm text-slate-600">
+                      <span>⏱ {r.time}</span> <span className="ml-3">👥 Serves {r.serves}</span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <Section title="Cleaning Process" subtitle={`How to clean ${fish.name.toLowerCase()} safely`} />
+            <div className="rounded-2xl border bg-white p-5 shadow-sm">
+              <StepList steps={fish.cleaning} />
+            </div>
+          </section>
+
+          <section>
+            <Section title="Benefits" subtitle="Why this fish is good for you" />
+            <div className="rounded-2xl border bg-white p-5 shadow-sm">
+              <ul className="list-disc pl-6 space-y-1 text-slate-800">
+                {fish.benefits.map((b, i) => (
+                  <li key={i}>{b}</li>
+                ))}
+              </ul>
+              <p className="text-xs text-slate-500 mt-3">
+                General nutrition notes. If you have allergies or dietary restrictions, adjust spices and portions accordingly.
+              </p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecipeView({ fishKey, recipeId, onBack }) {
+  const fish = FISH_DATA[fishKey];
+  const recipe = useMemo(
+    () => fish.recipes.find((r) => r.id === recipeId),
+    [fish, recipeId]
+  );
+
+  if (!recipe) return null;
+
+  const printRecipe = () => {
+    window.print();
+  };
+
+  return (
+    <div>
+      <Breadcrumb
+        items={[
+          { label: "Home", to: "home" },
+          { label: fish.name, to: "fish" },
+          { label: recipe.name },
+        ]}
+        onNavigate={(to) => {
+          if (to === "home") onBack("home");
+          if (to === "fish") onBack("fish");
+        }}
+      />
+
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <h2 className="text-2xl font-semibold text-slate-800">{recipe.name}</h2>
+              <div className="flex items-center gap-2">
+                <Pill>{recipe.style}</Pill>
+                <Pill>⏱ {recipe.time}</Pill>
+                <Pill>👥 {recipe.serves}</Pill>
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-semibold text-slate-800 mb-2">Ingredients</h3>
+                <IngredientList items={recipe.ingredients} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-800 mb-2">Steps</h3>
+                <StepList steps={recipe.steps} />
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center gap-3">
+              <button
+                onClick={() => onBack("fish")}
+                className="rounded-xl border px-4 py-2 font-medium hover:bg-slate-50"
+              >
+                ← Back to {fish.name}
+              </button>
+              <button
+                onClick={printRecipe}
+                className="rounded-xl bg-indigo-600 text-white px-4 py-2 font-medium hover:bg-indigo-700"
+              >
+                Print / Save as PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-1">
+          <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+            <img src={fish.image} alt={fish.name} className="w-full h-56 object-cover" />
+            <div className="p-4">
+              <h3 className="font-semibold text-slate-800">Cleaning Tips</h3>
+              <ul className="list-disc pl-6 space-y-1 text-slate-800 mt-1">
+                {fish.cleaning.slice(0, 4).map((c, i) => (
+                  <li key={i}>{c}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function FishAssistantApp() {
+  const [view, setView] = useState("home"); // home | fish | recipe
+  const [fishKey, setFishKey] = useState(null);
+  const [recipeId, setRecipeId] = useState(null);
+
+  const openFish = (key) => {
+    setFishKey(key);
+    setView("fish");
+    setRecipeId(null);
+  };
+
+  const openRecipe = (id) => {
+    setRecipeId(id);
+    setView("recipe");
+  };
+
+  const goBack = (to) => {
+    if (to === "home") {
+      setView("home");
+      setFishKey(null);
+      setRecipeId(null);
+    } else {
+      setView("fish");
+      setRecipeId(null);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-slate-50">
+      <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/60 bg-white/80 border-b">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-2xl bg-amber-200 grid place-items-center text-xl">🐟</div>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-slate-800">Smart Fish Assistant</h1>
+              <p className="text-xs text-slate-500">Pick a fish → see recipes, cleaning & benefits</p>
+            </div>
+          </div>
+          <div className="hidden sm:block text-sm text-slate-500">
+            Built with React & Tailwind
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-4 py-6">
+        {view === "home" && (
+          <>
+            <Section
+              title="Choose your fish"
+              subtitle="Tap a card to get recommendations"
+              right={<span className="text-sm text-slate-500">5 options</span>}
+            />
+            <FishGrid onPick={openFish} />
+          </>
+        )}
+
+        {view === "fish" && fishKey && (
+          <FishDetail fishKey={fishKey} onBack={() => goBack("home")} onOpenRecipe={openRecipe} />
+        )}
+
+        {view === "recipe" && fishKey && recipeId && (
+          <RecipeView fishKey={fishKey} recipeId={recipeId} onBack={goBack} />
+        )}
+      </main>
+
+      <footer className="max-w-6xl mx-auto px-4 pb-10 pt-6 text-center text-xs text-slate-500">
+        Nutrition information here is general; for specific health concerns, consult a professional.
+      </footer>
+    </div>
+  );
+}
